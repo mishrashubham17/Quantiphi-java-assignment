@@ -68,61 +68,16 @@ public class EncapsTest{
     } 
 }
 
-Q3
-class FetchData extends Thread{  
-    public void run(){ 
-    try{
-        Thread.sleep(500);
-    }
-    catch(InterruptedException e){
-        System.out.println(e);
-        
-    }  
-        System.out.println("fetchData is running"); 
-    }  
-    public static void main(String args[]){  
-    FetchData t1=new FetchData();  
-    t1.start();  
-     }  
-    }
-    
-     class ProcessData implements Runnable{  
-    public void run(){ 
-    try{
-        Thread.sleep(1000);
-    }
-    catch(InterruptedException e){
-        System.out.println(e);
-        
-    }  
-        System.out.println("processData is running"); 
-    }  
-    public static void main(String args[]){  
-    ProcessData p1=new ProcessData();  
-    Thread t1 =new Thread(p1);  
-    t1.start();  
-     }  
-    }
-    
-    public class result {
-        public static void main(String args[]){  
-        FetchData f1 = new FetchData();
-        ProcessData p1 = new ProcessData();
-        Thread t2 =new Thread(p1); 
-        t2.setPriority(Thread.MIN_PRIORITY);  
-        f1.setPriority(Thread.MAX_PRIORITY);  
-        f1.start();
-        t2.start();
-       
-     }  
-    }
+//Q3
 class fetchData extends Thread{  
     public void run(){ 
         try{
             // long startTime = System.currentTimeMillis();
             Thread.sleep(500);
             long endTime = System.currentTimeMillis();
-            System.out.println("fd "+(endTime - Main.startTime)+"ms");
+            for(int i=0;i<5;i++){
+            System.out.println("fd "+(endTime - Main.startTime)+"ms"+i);
+            }
         }
         catch(InterruptedException e){
             System.out.println(e);
@@ -137,7 +92,9 @@ class processData implements Runnable{
             // long startTime = System.currentTimeMillis();
             Thread.sleep(500);
             long endTime = System.currentTimeMillis();
-            System.out.println("pd "+(endTime - Main.startTime)+"ms");
+            for(int i=0;i<5;i++){
+                 System.out.println("pd "+(endTime - Main.startTime)+"ms"+i);
+            }
         }
         catch(InterruptedException e){
             System.out.println(e);     
@@ -165,4 +122,80 @@ public class Main {
              System.out.println(e);    
         }
     }  
+}
+
+//Q4
+
+class MessageResource {
+	private String message = "";
+
+	public MessageResource() {
+		if (message=="") {
+			this.message = "Intial Synchronised Message";
+		}
+	}
+
+	public synchronized String readResource() {
+		return message;
+	}
+
+	public synchronized String writeResource(String newMessage) throws Exception {
+		if (newMessage=="") {
+			throw new Exception("Message cannot be empty");
+		}
+		this.message = newMessage;
+		return this.message;
+	}
+}
+
+class ReaderThread extends Thread{
+    private MessageResource resource;
+
+    ReaderThread(MessageResource resource){
+        this.resource=resource;
+    }
+
+    @Override
+    public void run(){
+        for(int i=0;i<=5;i++){
+            System.out.println(resource.readResource());
+        }
+    }
+}
+
+class WriterThread extends Thread{
+    private MessageResource resource;
+    private String message;
+
+    WriterThread(MessageResource resource,String message){
+        this.resource=resource;
+        this.message=message;
+    }
+
+    @Override
+    public void run(){
+        try{
+            for(int i=0;i<=5;i++){
+                String dataWritten= this.resource.writeResource(this.message);
+                System.out.println("Following message was written to resource = "+ dataWritten);
+            }
+        }catch(Exception e){
+            System.out.println(e);
+        }
+    }
+}
+
+
+class main{
+    public static void main(String[] args) throws Exception {
+        MessageResource messageObject=new MessageResource();
+
+        Thread ReaderThread= new ReaderThread(messageObject);
+        Thread WriterThread= new WriterThread(messageObject,"Loading the sample data!!");
+
+        //starting both of the threads.
+        ReaderThread.start();
+        WriterThread.start();
+
+    }
 }
